@@ -35,70 +35,70 @@ struct ContentView: View {
     }
     
     @State private var remainingQuestionsQuantity = 0
-    
     @State private var currentQuestionNumber = 1
     
     @State private var table = 1
     @State private var answer = ""
+    @State private var correctAnswers = 0
     
     @State private var isGameRunning = false
-    @State private var isWaitingNext = false
+    @State private var isWaitingForNextQuest = false
     
     var body: some View {
-        
-        Group {
-            Text("Please, select quantity of multiplication tables")
-            
-            if self.table < 2 {
-                Stepper("Up to ... \(table) table selected", value: $table, in: 1 ... 9)
-            } else {
-                Stepper("Up to ... \(table) tables selected", value: $table, in: 1 ... 9)
-            }
-            
-            Spacer(minLength: 50)
-            
-            Text("Please, select how many questions you want to be asked")
-            
-            Picker(selection: $selectedQuestQuantity, label: Text("\(howManyQuestions[selectedQuestQuantity]) question selected")) {
-                ForEach(0 ..< howManyQuestions.count) {
-                    Text(self.howManyQuestions[$0])
-                }
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            
-            Spacer()
-            
-            Button("Go") {
-                self.start()
-            }
-            .font(.largeTitle)
-            
+        NavigationView {
             Form {
-                if isGameRunning == true {
-                    Text("Question: \(questions[currentQuestionNumber])")
-                    
-                    TextField("Answer:", text: $answer) {
-                        self.acceptAnswer(self.answer)
-                        self.answer = ""
-                    }
-                    .keyboardType(.numberPad)
- 
-                    Button("Submit") {
-                        self.isGameRunning = false
-                        self.isWaitingNext = true
-                        self.acceptAnswer(self.answer)
-                        self.answer = ""
-                    }
-                    .font(.largeTitle)
+                Text("Please, select quantity of multiplication tables")
+                
+                if self.table < 2 {
+                    Stepper("Up to ... \(table) table selected", value: $table, in: 1 ... 9)
+                } else {
+                    Stepper("Up to ... \(table) tables selected", value: $table, in: 1 ... 9)
                 }
-                if isWaitingNext == true {
-                    Button("Next") {
-                        self.asking(questions: self.remainingQuestionsQuantity)
-                        self.isWaitingNext = false
+                
+                Spacer(minLength: 30)
+                
+                Text("Please, select how many questions you want to be asked")
+                
+                Picker(selection: $selectedQuestQuantity, label: Text("\(howManyQuestions[selectedQuestQuantity]) question selected")) {
+                    ForEach(0 ..< howManyQuestions.count) {
+                        Text(self.howManyQuestions[$0])
                     }
-                    .font(.largeTitle)
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                
+                Button("Go") {
+                    self.start()
+                }
+                .font(.largeTitle)
+                
+                Group {
+                    if isGameRunning == true {
+                        Text("Question: \(questions[currentQuestionNumber])")
+                        
+                        TextField("Answer:", text: $answer) {
+                            self.acceptAnswer(self.answer)
+                            self.answer = ""
+                        }
+                        .keyboardType(.numberPad)
+                        
+                        Button("Submit") {
+                            self.isGameRunning = false
+                            self.isWaitingForNextQuest = true
+                            self.acceptAnswer(self.answer)
+                            self.answer = ""
+                        }
+                        .font(.largeTitle)
+                    }
+                    if isWaitingForNextQuest == true {
+                        Button("Next") {
+                            self.asking(questions: self.remainingQuestionsQuantity)
+                            self.isWaitingForNextQuest = false
+                        }
+                        .font(.largeTitle)
+                    }
                 }
             }
+            .navigationBarTitle("Multiplication Quest")
         }
     }
     
@@ -141,6 +141,8 @@ struct ContentView: View {
         
         let answerValue = answers[currentQuestionNumber]
         if answer == answerValue {
+            correctAnswers += 1
+            
             print("Correct!")
         } else {
             print("Wrong!")
