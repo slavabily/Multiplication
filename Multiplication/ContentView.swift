@@ -42,6 +42,7 @@ struct ContentView: View {
     @State private var answer = ""
     
     @State private var isGameRunning = false
+    @State private var isWaitingNext = false
     
     var body: some View {
         
@@ -80,6 +81,22 @@ struct ContentView: View {
                         self.acceptAnswer(self.answer)
                         self.answer = ""
                     }
+                    .keyboardType(.numberPad)
+ 
+                    Button("Submit") {
+                        self.isGameRunning = false
+                        self.isWaitingNext = true
+                        self.acceptAnswer(self.answer)
+                        self.answer = ""
+                    }
+                    .font(.largeTitle)
+                }
+                if isWaitingNext == true {
+                    Button("Next") {
+                        self.asking(questions: self.remainingQuestionsQuantity)
+                        self.isWaitingNext = false
+                    }
+                    .font(.largeTitle)
                 }
             }
         }
@@ -99,14 +116,14 @@ struct ContentView: View {
         print("Array of questions: \(questions)")
         print("Answers array: \(answers)")
         
-        self.isGameRunning = true
-        
         remainingQuestionsQuantity = selectedQuestionsLimit
         
        asking(questions: remainingQuestionsQuantity)
     }
     
     func asking(questions quantity: Int) {
+        
+        self.isGameRunning = true
         
         if quantity > 0 {
             currentQuestionNumber = Int.random(in: 0 ... (table * 10 - 1))
@@ -128,8 +145,7 @@ struct ContentView: View {
         } else {
             print("Wrong!")
         }
-        asking(questions: remainingQuestionsQuantity)
-    }
+     }
  }
 
 struct ContentView_Previews: PreviewProvider {
