@@ -42,7 +42,6 @@ struct ContentView: View {
     @State private var correctAnswers = 0
     
     @State private var isGameRunning = false
-    @State private var isWaitingForNextQuest = false
     @State private var isFinalAlertShowing = false
     @State private var isAnswerAlertShowing = false
     @State private var answerTitle = ""
@@ -79,8 +78,7 @@ struct ContentView: View {
                     }
                 } else {
                     Group {
-                        if isWaitingForNextQuest == false {
-                            Text("Question \(selectedQuestionsLimit - remainingQuestionsQuantity): \(questions[currentQuestionNumber])")
+                             Text("Question \(selectedQuestionsLimit - remainingQuestionsQuantity): \(questions[currentQuestionNumber])")
                             
                             HStack {
                                 TextField("Answer:", text: $answer) {
@@ -90,32 +88,34 @@ struct ContentView: View {
                                 .keyboardType(.numberPad)
                                 
                                 Button("Submit") {
-                                    self.isWaitingForNextQuest = true
                                     self.acceptAnswer(self.answer)
                                     self.answer = ""
                                 }
                                 .font(.headline)
                             }
-                        }
-                    }
+                     }
                 }
             }
             .navigationBarTitle("Multiplication Quest")
             .alert(isPresented: $isAnswerAlertShowing) {
-                Alert(title: Text(answerTitle), message: Text(answerMessage), dismissButton: .default(Text("Continue"), action: {
+                Alert(title: Text(answerTitle), message: Text(answerMessage), primaryButton: .default(Text("Continue"), action: {
                     self.asking(questions: self.remainingQuestionsQuantity)
-                    self.isWaitingForNextQuest = false
-                }))
+                 }), secondaryButton: .cancel({
+                    self.isGameRunning = false
+                 }))
             }
         }
         .alert(isPresented: $isFinalAlertShowing) {
-            Alert(title: Text("You've got correct \(correctAnswers) questions"), message: Text("Would you like to play again?"), dismissButton: .default(Text("Ok")))
+            Alert(title: Text("You've got correct \(correctAnswers) questions"), message: Text("Would you like to play again?"), primaryButton: .default(Text("Play again"), action: {
+                self.start()
+            }), secondaryButton: .cancel())
         }
     }
     
     func start() {
         questions.removeAll()
         answers.removeAll()
+        correctAnswers = 0
         
         for j in 1 ... table {
             for i in 1 ... 10 {
