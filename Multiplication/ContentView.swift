@@ -43,6 +43,7 @@ struct ContentView: View {
     
     @State private var isGameRunning = false
     @State private var isWaitingForNextQuest = false
+    @State private var isFinalAlertShowing = false
     
     var body: some View {
         NavigationView {
@@ -66,28 +67,31 @@ struct ContentView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 
-                Button("Go") {
-                    self.start()
+                if isGameRunning == false {
+                    Button("Play") {
+                        self.start()
+                    }
+                    .font(.largeTitle)
                 }
-                .font(.largeTitle)
                 
                 Group {
-                    if isGameRunning == true {
-                        Text("Question: \(questions[currentQuestionNumber])")
+                    if isGameRunning == true && isWaitingForNextQuest == false {
+                        Text("Question \(selectedQuestionsLimit - remainingQuestionsQuantity): \(questions[currentQuestionNumber])")
                         
-                        TextField("Answer:", text: $answer) {
-                            self.acceptAnswer(self.answer)
-                            self.answer = ""
-                        }
-                        .keyboardType(.numberPad)
-                        
-                        Button("Submit") {
-                            self.isGameRunning = false
-                            self.isWaitingForNextQuest = true
-                            self.acceptAnswer(self.answer)
-                            self.answer = ""
-                        }
-                        .font(.largeTitle)
+                        HStack {
+                                 TextField("Answer:", text: $answer) {
+                                    self.acceptAnswer(self.answer)
+                                    self.answer = ""
+                                }
+                                .keyboardType(.numberPad)
+                                
+                                Button("Submit") {
+                                    self.isWaitingForNextQuest = true
+                                    self.acceptAnswer(self.answer)
+                                    self.answer = ""
+                                }
+                                .font(.headline)
+                         }
                     }
                     if isWaitingForNextQuest == true {
                         Button("Next") {
@@ -99,6 +103,9 @@ struct ContentView: View {
                 }
             }
             .navigationBarTitle("Multiplication Quest")
+        }
+        .alert(isPresented: $isFinalAlertShowing) {
+            Alert(title: Text("You've got correct \(correctAnswers) questions"), message: Text("Would you like to play again?"), dismissButton: .default(Text("Ok")))
         }
     }
     
@@ -130,6 +137,7 @@ struct ContentView: View {
             print("Current question number: \(currentQuestionNumber)")
         } else {
             self.isGameRunning = false
+            self.isFinalAlertShowing = true
             print("Game End")
         }
         remainingQuestionsQuantity -= 1
