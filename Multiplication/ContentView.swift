@@ -44,42 +44,46 @@ struct ContentView: View {
     @State private var isGameRunning = false
     @State private var isWaitingForNextQuest = false
     @State private var isFinalAlertShowing = false
+    @State private var isAnswerAlertShowing = false
+    @State private var answerTitle = ""
+    @State private var answerMessage = ""
     
     var body: some View {
         NavigationView {
             Form {
-                Text("Please, select quantity of multiplication tables")
-                
-                if self.table < 2 {
-                    Stepper("Up to ... \(table) table selected", value: $table, in: 1 ... 9)
-                } else {
-                    Stepper("Up to ... \(table) tables selected", value: $table, in: 1 ... 9)
-                }
-                
-                Spacer(minLength: 30)
-                
-                Text("Please, select how many questions you want to be asked")
-                
-                Picker(selection: $selectedQuestQuantity, label: Text("\(howManyQuestions[selectedQuestQuantity]) question selected")) {
-                    ForEach(0 ..< howManyQuestions.count) {
-                        Text(self.howManyQuestions[$0])
-                    }
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                
                 if isGameRunning == false {
-                    Button("Play") {
-                        self.start()
-                    }
-                    .font(.largeTitle)
-                }
-                
-                Group {
-                    if isGameRunning == true && isWaitingForNextQuest == false {
-                        Text("Question \(selectedQuestionsLimit - remainingQuestionsQuantity): \(questions[currentQuestionNumber])")
+                    Group {
+                        Text("Please, select quantity of multiplication tables")
                         
-                        HStack {
-                                 TextField("Answer:", text: $answer) {
+                        if self.table < 2 {
+                            Stepper("Up to ... \(table) table selected", value: $table, in: 1 ... 9)
+                        } else {
+                            Stepper("Up to ... \(table) tables selected", value: $table, in: 1 ... 9)
+                        }
+                        
+                        Spacer(minLength: 30)
+                        
+                        Text("Please, select how many questions you want to be asked")
+                        
+                        Picker(selection: $selectedQuestQuantity, label: Text("\(howManyQuestions[selectedQuestQuantity]) question selected")) {
+                            ForEach(0 ..< howManyQuestions.count) {
+                                Text(self.howManyQuestions[$0])
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                        
+                        Button("Play") {
+                            self.start()
+                        }
+                        .font(.largeTitle)
+                    }
+                } else {
+                    Group {
+                        if isWaitingForNextQuest == false {
+                            Text("Question \(selectedQuestionsLimit - remainingQuestionsQuantity): \(questions[currentQuestionNumber])")
+                            
+                            HStack {
+                                TextField("Answer:", text: $answer) {
                                     self.acceptAnswer(self.answer)
                                     self.answer = ""
                                 }
@@ -91,18 +95,18 @@ struct ContentView: View {
                                     self.answer = ""
                                 }
                                 .font(.headline)
-                         }
-                    }
-                    if isWaitingForNextQuest == true {
-                        Button("Next") {
-                            self.asking(questions: self.remainingQuestionsQuantity)
-                            self.isWaitingForNextQuest = false
+                            }
                         }
-                        .font(.largeTitle)
                     }
                 }
             }
             .navigationBarTitle("Multiplication Quest")
+            .alert(isPresented: $isAnswerAlertShowing) {
+                Alert(title: Text(answerTitle), message: Text(answerMessage), dismissButton: .default(Text("Continue"), action: {
+                    self.asking(questions: self.remainingQuestionsQuantity)
+                    self.isWaitingForNextQuest = false
+                }))
+            }
         }
         .alert(isPresented: $isFinalAlertShowing) {
             Alert(title: Text("You've got correct \(correctAnswers) questions"), message: Text("Would you like to play again?"), dismissButton: .default(Text("Ok")))
@@ -150,11 +154,15 @@ struct ContentView: View {
         let answerValue = answers[currentQuestionNumber]
         if answer == answerValue {
             correctAnswers += 1
-            
             print("Correct!")
+            answerTitle = "Correct!"
+            answerMessage = ""
         } else {
             print("Wrong!")
+            answerTitle = "Wrong!"
+           answerMessage = "Correct answer is: \(answerValue)"
         }
+         isAnswerAlertShowing = true
      }
  }
 
