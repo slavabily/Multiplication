@@ -48,65 +48,66 @@ struct ContentView: View {
     @State private var answerMessage = ""
     
     var body: some View {
-        NavigationView {
-            Form {
-                if isGameRunning == false {
-                    Group {
-                        Text("Please, select quantity of multiplication tables")
+              NavigationView {
+                Form {
+                    if isGameRunning == false {
+                        Group {
+                            Text("Please, select quantity of multiplication tables")
 
-                        Stepper(self.table < 2 ? "Up to ... \(table) table selected" : "Up to ... \(table) tables selected", value: $table, in: 1 ... 9)
-                        
-                        Spacer(minLength: 30)
-                        
-                        Text("Please, select how many questions you want to be asked")
-                        
-                        Picker(selection: $selectedQuestQuantity, label: Text("\(howManyQuestions[selectedQuestQuantity]) question selected")) {
-                            ForEach(0 ..< howManyQuestions.count) {
-                                Text(self.howManyQuestions[$0])
-                            }
-                        }
-                        .pickerStyle(SegmentedPickerStyle())
-                        
-                        Button("Play") {
-                            self.start()
-                        }
-                        .font(.largeTitle)
-                    }
-                } else {
-                    Group {
-                        Text("Question \(selectedQuestionsLimit - remainingQuestionsQuantity): \(questions[currentQuestionNumber])")
-                        
-                        HStack {
-                            TextField("Answer:", text: $answer) {
-                                self.acceptAnswer(self.answer)
-                                self.answer = ""
-                            }
-                            .keyboardType(.numberPad)
+                            Stepper(self.table < 2 ? "Up to ... \(table) table selected" : "Up to ... \(table) tables selected", value: $table, in: 1 ... 9)
                             
-                            Button("Submit") {
-                                self.acceptAnswer(self.answer)
-                                self.answer = ""
+                            Spacer(minLength: 30)
+                            
+                            Text("Please, select how many questions you want to be asked")
+                            
+                            Picker(selection: $selectedQuestQuantity, label: Text("\(howManyQuestions[selectedQuestQuantity]) question selected")) {
+                                ForEach(0 ..< howManyQuestions.count) {
+                                    Text(self.howManyQuestions[$0])
+                                }
                             }
-                            .font(.headline)
+                            .pickerStyle(SegmentedPickerStyle())
+                            
+                            Button(action: {
+                                self.start()
+                            }) {
+                                Image("tom", label: Text("Play"))
+                            }
+                        }
+                    } else {
+                        Group {
+                            Text("Question \(selectedQuestionsLimit - remainingQuestionsQuantity): \(questions[currentQuestionNumber])")
+                            
+                            HStack {
+                                TextField("Answer:", text: $answer) {
+                                    self.acceptAnswer(self.answer)
+                                    self.answer = ""
+                                }
+                                .keyboardType(.numberPad)
+                                
+                                Button("Submit") {
+                                    self.acceptAnswer(self.answer)
+                                    self.answer = ""
+                                }
+                                .font(.headline)
+                            }
                         }
                     }
                 }
+                .navigationBarTitle("Multiplication Quest") 
+                .alert(isPresented: $isAnswerAlertShowing) {
+                    Alert(title: Text(answerTitle), message: Text(answerMessage), primaryButton: .default(Text("Continue"), action: {
+                        self.asking(questions: self.remainingQuestionsQuantity)
+                     }), secondaryButton: .cancel({
+                        self.isGameRunning = false
+                     }))
+                }
             }
-            .navigationBarTitle("Multiplication Quest")
-            .alert(isPresented: $isAnswerAlertShowing) {
-                Alert(title: Text(answerTitle), message: Text(answerMessage), primaryButton: .default(Text("Continue"), action: {
-                    self.asking(questions: self.remainingQuestionsQuantity)
-                 }), secondaryButton: .cancel({
-                    self.isGameRunning = false
-                 }))
+            .alert(isPresented: $isFinalAlertShowing) {
+                Alert(title: Text("You've got correct \(correctAnswers) questions"), message: Text("Would you like to play again?"), primaryButton: .default(Text("Play again"), action: {
+                    self.start()
+                }), secondaryButton: .cancel())
             }
-        }
-        .alert(isPresented: $isFinalAlertShowing) {
-            Alert(title: Text("You've got correct \(correctAnswers) questions"), message: Text("Would you like to play again?"), primaryButton: .default(Text("Play again"), action: {
-                self.start()
-            }), secondaryButton: .cancel())
-        }
-    }
+     }
     
     func start() {
         questions.removeAll()
