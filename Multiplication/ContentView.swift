@@ -31,7 +31,7 @@ struct ContentView: View {
     
     var selectedQuestionsLimit: Int {
         let selected = howManyQuestions[selectedQuestQuantity]
-        return Int(selected) ?? 30
+        return Int(selected) ?? 50
     }
     
     @State private var remainingQuestionsQuantity = 0
@@ -53,12 +53,8 @@ struct ContentView: View {
                 if isGameRunning == false {
                     Group {
                         Text("Please, select quantity of multiplication tables")
-                        
-                        if self.table < 2 {
-                            Stepper("Up to ... \(table) table selected", value: $table, in: 1 ... 9)
-                        } else {
-                            Stepper("Up to ... \(table) tables selected", value: $table, in: 1 ... 9)
-                        }
+
+                        Stepper(self.table < 2 ? "Up to ... \(table) table selected" : "Up to ... \(table) tables selected", value: $table, in: 1 ... 9)
                         
                         Spacer(minLength: 30)
                         
@@ -78,22 +74,22 @@ struct ContentView: View {
                     }
                 } else {
                     Group {
-                             Text("Question \(selectedQuestionsLimit - remainingQuestionsQuantity): \(questions[currentQuestionNumber])")
-                            
-                            HStack {
-                                TextField("Answer:", text: $answer) {
-                                    self.acceptAnswer(self.answer)
-                                    self.answer = ""
-                                }
-                                .keyboardType(.numberPad)
-                                
-                                Button("Submit") {
-                                    self.acceptAnswer(self.answer)
-                                    self.answer = ""
-                                }
-                                .font(.headline)
+                        Text("Question \(selectedQuestionsLimit - remainingQuestionsQuantity): \(questions[currentQuestionNumber])")
+                        
+                        HStack {
+                            TextField("Answer:", text: $answer) {
+                                self.acceptAnswer(self.answer)
+                                self.answer = ""
                             }
-                     }
+                            .keyboardType(.numberPad)
+                            
+                            Button("Submit") {
+                                self.acceptAnswer(self.answer)
+                                self.answer = ""
+                            }
+                            .font(.headline)
+                        }
+                    }
                 }
             }
             .navigationBarTitle("Multiplication Quest")
